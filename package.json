@@ -1,0 +1,31 @@
+{
+  "name": "ascii-art",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "lint": "eslint . --max-warnings 1",
+    "prettier:check": "prettier . --check",
+    "prettier:write": "prettier . --write"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-react": "4.3",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "prettier": "^3.4.2",
+    "vite": "^5.3.3"
+  },
+  "dependencies": {
+    "peerjs": "^1.5.4",
+    "react": "18.3",
+    "react-dom": "18.3",
+    "react-router-dom": "^7.2.0",
+    "vite-plugin-restart": "^0.4.2"
+  }
+}
