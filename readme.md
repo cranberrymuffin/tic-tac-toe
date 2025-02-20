@@ -1,31 +1,42 @@
-# WebRTC Multiplayer Tic-Tac-Toe
+# WebRTC Multiplayer Tic-Tac-Toe 🎮
 
-What if you could play a game online with a friend, peer-to-peer, without needing a backend server? Just two players connected directly through the magic of WebRTC and PeerJS. This guide explores how this was accomplished in Tic-Tac-Toe.
+A **serverless**, real-time **Tic-Tac-Toe** game using **WebRTC** and **PeerJS** for direct peer-to-peer communication. This project eliminates the need for a backend by enabling two players to connect directly and exchange data instantly, creating a seamless multiplayer experience.
 
-## Peer-to-Peer: No Servers, No Problem
+## 🚀 Key Features:
 
-WebRTC is used to establish a direct connection between two players (the host and the guest). Here’s how it plays a crucial role:
+- **Peer-to-peer gameplay** using **WebRTC** and **PeerJS**
+- **Real-time data exchange** with low-latency communication
+- **Single-player** mode against an **AI opponent**
+- **Dynamic game state updates** with **React**
+- **No server required** — fully client-side
 
-- **Peer-to-peer connection**: Instead of sending requests to a server to fetch or update the game state, WebRTC establishes a direct connection between two browsers.
-- **Low-latency communication**: This is ideal for real-time applications like games. WebRTC's data channel enables **bi-directional communication**, allowing players to send game moves instantly.
+## 🔍 How It Works:
 
-For example, when a player makes a move, that move is transmitted via the **data channel** to the opponent, who updates their board state in real-time.
+### Peer-to-Peer: No Servers, No Problem
 
-Most multiplayer games rely on a server to shuttle messages back and forth. WebRTC **skips the middleman**, letting two players connect **directly** and exchange data **instantly**, eliminating the need for an expensive backend.
+WebRTC facilitates a direct connection between the host and guest players, allowing them to send game moves in real-time without relying on a backend server. Here's how it works:
 
-## PeerJS: Making WebRTC Easy
+- **Direct connection**: WebRTC establishes a peer-to-peer connection between two browsers, bypassing the need for a centralized server.
+- **Low-latency communication**: Perfect for real-time applications like games, where fast data exchange is essential.
+- **Data channel**: WebRTC’s data channel allows for bi-directional communication, enabling instant transmission of game moves between players.
 
-WebRTC is powerful, but setting it up manually can be a headache. **Enter PeerJS**, a library that simplifies WebRTC connections. Instead of dealing with complex connection details, PeerJS assigns each player a **unique ID**. One player shares their ID, the other connects, and boom—game on.
+When one player makes a move, that move is sent via the **data channel** to the opponent, who updates their game state immediately.
+
+### PeerJS: Simplifying WebRTC Connections
+
+While WebRTC is powerful, managing connections manually can be complex. That's where **PeerJS** comes in. PeerJS simplifies WebRTC’s intricacies by generating a **unique ID** for each player and handling connection setup.
+
+## 🛠️ Step-by-Step Guide:
 
 ### Step 1: Creating a Peer Instance
 
-Each player needs to create a **Peer** instance:
+Each player creates a **Peer** instance using PeerJS:
 
 ```js
 const peer = new Peer();
 ```
 
-The `Peer` object takes some time to set up. Once created, we must wait for the `peer.on('open', ...)` event handler to ensure that the `Peer` object has been **fully initialized**.
+Once the `Peer` object is created, wait for the `open` event to ensure the peer is initialized:
 
 ```js
 peer.on('open', id => {
@@ -35,7 +46,7 @@ peer.on('open', id => {
 
 ### Step 2: Hosting the Game
 
-One player's `Peer` object will act as a **host**. After the **open** event handler is triggered, the host can share their **Peer ID** with the other player. Once the client connects, the **host's** `peer.on('connection', ...)` event will be triggered.
+The **host player** will share their **Peer ID** with the other player. Upon receiving a connection request, the host’s `peer.on('connection', ...)` event handler will be triggered.
 
 ```js
 peer.on('connection', conn => {
@@ -47,15 +58,15 @@ peer.on('connection', conn => {
 });
 ```
 
-### Step 3: Joining a Game
+### Step 3: Joining the Game
 
-The other player (client) connects to the host using the **host's Peer ID**:
+The **client player** will use the host's **Peer ID** to establish a connection:
 
 ```js
 const conn = peer.connect(hostPeerId);
 ```
 
-Since the `connect` method takes some time to establish the connection, we listen for the `conn.on("open", ...)` event to ensure it's fully set up:
+Once the connection is made, the `open` event is triggered:
 
 ```js
 conn.on('open', () => {
@@ -65,20 +76,41 @@ conn.on('open', () => {
 
 ### Step 4: Sending and Receiving Data
 
-Both the **host** and the **client** should subscribe to the `conn.on("data", ...)` event handler to receive messages:
+Both the **host** and **client** subscribe to the `conn.on('data', ...)` event handler to receive game data. They can also send data using `conn.send()`:
 
 ```js
 conn.on('data', data => {
   console.log('Received:', data);
 });
-```
 
-They can also send data using `conn.send()`:
-
-```js
 conn.send({ move: 'X', position: [0, 1] });
 ```
 
-## Conclusion
+## 🧠 AI Mode (Single Player)
 
-By leveraging **WebRTC** and **PeerJS**, we've created a **serverless** multiplayer Tic-Tac-Toe game with real-time communication. No backend, no problem—just **peer-to-peer gaming** at its finest!
+The **AI opponent** in single-player mode uses a **two-phase decision-making process**:
+
+1. **Block Player's Winning Moves**: The AI first looks for any winning move that the player can make and blocks it. It prioritizes this step to ensure that the player does not win immediately.
+2. **Build Towards a Win**: After blocking, the AI searches for opportunities to set up its own winning move. It evaluates the board for potential winning positions and prioritizes completing those setups.
+
+This strategy ensures that the AI not only defends against the player’s moves but also actively works towards securing a victory when possible.
+
+## Installation & Running the Game
+
+1. Clone the repository:
+2. Install dependencies:
+   ```sh
+   npm install && npm run dev
+   ```
+
+---
+
+## Contributions
+
+Contributions are welcome! Feel free to submit a pull request from your fork, or open an issue.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See `LICENSE` for details.
