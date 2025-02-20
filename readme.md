@@ -1,31 +1,84 @@
-# WebRTC multiplayer Tic-Tac-Toe
+# WebRTC Multiplayer Tic-Tac-Toe
 
-What if you could play a game online with a friend, peer-to-peer, without needing a backend server? Just two players connected directly through the magic of WebRTC and PeerJS. We are going to explore how this was accomplished in Tic-Tac-Toe.
+What if you could play a game online with a friend, peer-to-peer, without needing a backend server? Just two players connected directly through the magic of WebRTC and PeerJS. This guide explores how this was accomplished in Tic-Tac-Toe.
 
 ## Peer-to-Peer: No Servers, No Problem
 
-WebRTC is used to establish a direct connection between two players (the host and the guest). Here’s how it plays a crucial role: Peer-to-peer connection: Instead of sending requests to a server to fetch or update the game state, WebRTC establishes a direct connection between two browsers.
+WebRTC is used to establish a direct connection between two players (the host and the guest). Here’s how it plays a crucial role:
 
-This enables low-latency communication, which is ideal for real-time applications like games. WebRTC's data channel is key here. It’s a bi-directional communication channel between two peers, allowing them to send messages, like game moves, back and forth instantly. For example, when a player makes a move on their board, that move is transmitted via the data channel to the opponent, who updates their board state in real-time.
+- **Peer-to-peer connection**: Instead of sending requests to a server to fetch or update the game state, WebRTC establishes a direct connection between two browsers.
+- **Low-latency communication**: This is ideal for real-time applications like games. WebRTC's data channel enables **bi-directional communication**, allowing players to send game moves instantly.
 
-Most multiplayer games rely on a server to shuttle messages back and forth. WebRTC skips all that. It lets two playersconnect directly andexchange data instantly. That means no need for an expensive backend.
+For example, when a player makes a move, that move is transmitted via the **data channel** to the opponent, who updates their board state in real-time.
+
+Most multiplayer games rely on a server to shuttle messages back and forth. WebRTC **skips the middleman**, letting two players connect **directly** and exchange data **instantly**, eliminating the need for an expensive backend.
 
 ## PeerJS: Making WebRTC Easy
 
-WebRTC is great, but setting it up can be a headache. Enter PeerJS, which simplifies everything. Instead of dealing with connection details, PeerJS assigns each player a unique ID. One player shares their ID, the other connects, and boom—game on.
+WebRTC is powerful, but setting it up manually can be a headache. **Enter PeerJS**, a library that simplifies WebRTC connections. Instead of dealing with complex connection details, PeerJS assigns each player a **unique ID**. One player shares their ID, the other connects, and boom—game on.
 
-### Step 1: new Peer()
+### Step 1: Creating a Peer Instance
 
-Each player needs to have an instance of new Peer() to participate in PeerJs backed WebRTC. The peer object takes some time to be set up. So once a new Peer() is created, we must wait for the peer.on('open', ...) event handler to be triggered in order to guarantee the Peer object has been competely set up.
+Each player needs to create a **Peer** instance:
 
-### Step 2: Hosting
+```js
+const peer = new Peer();
+```
 
-One player's Peer object will act as a host. After the open Event Handler is triggered on the host peer, its code can be shared to a client to create a data channel. Once that data channel is created, the host peer's peer.on('connection', ...) event handler is triggered. The event handler will pass a ready peer js DataConnection object to the callback triggered. This DataConnection is a data channel to send and recieve messages to the connected client.
+The `Peer` object takes some time to set up. Once created, we must wait for the `peer.on('open', ...)` event handler to ensure that the `Peer` object has been **fully initialized**.
 
-### Step 3: Joining
+```js
+peer.on('open', id => {
+  console.log('Peer connected with ID:', id);
+});
+```
 
-The other player's Peer object will connect to a host using the host's peer ID. This will be done via const conn = peer.connect(hostPeerId)conn in this code snippet is of type DataConnection. The DataConnection takes some time to set up onceconnect is called. We will listen to the DataConnection's conn.on("open", ...) event handler to be triggered to ensure the DataConnection is done being set up.
+### Step 2: Hosting the Game
 
-### Step 4: Sending and Recieving data
+One player's `Peer` object will act as a **host**. After the **open** event handler is triggered, the host can share their **Peer ID** with the other player. Once the client connects, the **host's** `peer.on('connection', ...)` event will be triggered.
 
-Both the host and the client should subscribe to the conn.on("data", ...) event handler. This event handler will trigger a callback and pass data recieved via the DataConnection. Both the host and the client can send data via conn.send
+```js
+peer.on('connection', conn => {
+  console.log('New connection established!');
+
+  conn.on('data', data => {
+    console.log('Received:', data);
+  });
+});
+```
+
+### Step 3: Joining a Game
+
+The other player (client) connects to the host using the **host's Peer ID**:
+
+```js
+const conn = peer.connect(hostPeerId);
+```
+
+Since the `connect` method takes some time to establish the connection, we listen for the `conn.on("open", ...)` event to ensure it's fully set up:
+
+```js
+conn.on('open', () => {
+  console.log('Connected to host!');
+});
+```
+
+### Step 4: Sending and Receiving Data
+
+Both the **host** and the **client** should subscribe to the `conn.on("data", ...)` event handler to receive messages:
+
+```js
+conn.on('data', data => {
+  console.log('Received:', data);
+});
+```
+
+They can also send data using `conn.send()`:
+
+```js
+conn.send({ move: 'X', position: [0, 1] });
+```
+
+## Conclusion
+
+By leveraging **WebRTC** and **PeerJS**, we've created a **serverless** multiplayer Tic-Tac-Toe game with real-time communication. No backend, no problem—just **peer-to-peer gaming** at its finest!
